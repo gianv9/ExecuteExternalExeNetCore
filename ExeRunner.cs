@@ -96,6 +96,15 @@ class ExeRunner
             MainExe = mainExeName;
             WorkingDirectory = StartupPath;
         }
+
+    /// <summary>
+    /// Uses a custom directory.
+    /// </summary>
+    public ExeRunner(string mainExeName, string newRunningDirectory, string customDirectory){
+            MainExe = mainExeName;
+            WorkingDirectory = newRunningDirectory;
+            StartupPath = customDirectory;
+        }
     #endregion
 
 
@@ -124,19 +133,22 @@ class ExeRunner
     /// </summary>
     /// Source: <see cref="https://stackoverflow.com/questions/9679375/run-an-exe-from-c-sharp-code"/>
     public void Execute(){
-        Console.WriteLine(this.MainExe);
+        
     // Use ProcessStartInfo class
         // example: https://msdn.microsoft.com/es-es/library/system.diagnostics.processstartinfo.redirectstandardoutput(v=vs.110).aspx#Ejemplos
         ProcessStartInfo startInfo = new ProcessStartInfo();
         startInfo.CreateNoWindow = false;
         startInfo.UseShellExecute = false;
-        startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+        startInfo.WindowStyle = ProcessWindowStyle.Maximized;
         startInfo.FileName = StartupPath + this.MainExe;
         startInfo.RedirectStandardError = true;
         startInfo.RedirectStandardOutput = true;
+
+        FolderCreator.CreateFolder(this.WorkingDirectory + "\\Results" );
+
         startInfo.WorkingDirectory = this.WorkingDirectory + "\\Results" ;
         startInfo.Arguments = this.BuildFullParameter();
-
+        Console.WriteLine(startInfo.Arguments);
         try
         {
             // Start the process with the info we specified.
