@@ -1,4 +1,4 @@
-# ExecuteExternalExe
+# ExecuteExternalExeNetCore
 Executing the youtube-dl.exe within a c# console application
 
 Ejecutables utilizados: youtube-dl.exe, ffmpeg.exe (este ultimo a su vez utiliza ffplay.exe, ffprobe.exe)
