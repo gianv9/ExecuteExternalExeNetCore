@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
+using System.Threading;
 
 using System;
 
@@ -9,7 +10,10 @@ using System;
 /// </summary>
 class ExeRunner
 {
-
+    #region Thread Attributes
+    private ManualResetEvent _doneEvent;
+    #endregion
+    
     #region classAttributes
     // Current Working Directory
             // Getting the current directory path
@@ -31,7 +35,6 @@ class ExeRunner
     // Exe Exception
     private string exception;        
     #endregion
-
 
     #region Gettes&Setters
         
@@ -75,19 +78,35 @@ class ExeRunner
     /// </summary>
     /// <returns></returns>
     public static string StartupPath { get => startupPath; set => startupPath = value; }
+    
+
+    /// <summary>
+    /// Defines the Event handler for the threadingpool to use
+    /// </summary>
+    /// <returns></returns>
+    public ManualResetEvent DoneEvent { get => _doneEvent; set => _doneEvent = value; }
 
 
     #endregion
 
-
     #region Constructors
     /// <summary>
-    /// Uses the current directory and searches for the "ExePrograms" directory, But runs the program elsewhere
+    /// Uses the current directory and searches for the "ExePrograms" directory, But runs the program elsewhere. NOTE: THIS DOES NOT USE THREADING, USE A DIFFERENT CONSTRUCTOR FOR THIS PURPOSE.
     /// </summary>
     public ExeRunner(string mainExeName, string newRunningDirectory){
             MainExe = mainExeName;
             WorkingDirectory = newRunningDirectory;
         }
+
+    /// <summary>
+    /// Uses the current directory and searches for the "ExePrograms" directory, But runs the program elsewhere. NOTE: THIS CONSTRUCTOR IS FOR EXECUTING THE METHOD ON A THREADPOOL.
+    /// </summary>
+    public ExeRunner(string mainExeName, string newRunningDirectory, ManualResetEvent doneEvent){
+            MainExe = mainExeName;
+            WorkingDirectory = newRunningDirectory;
+            DoneEvent = doneEvent;
+        }
+
 
     /// <summary>
     /// Uses the current directory and searches for the "ExePrograms" directory.
@@ -129,7 +148,7 @@ class ExeRunner
     }
 
     /// <summary>
-    /// 
+    /// Method that executes the external program
     /// </summary>
     /// Source: <see cref="https://stackoverflow.com/questions/9679375/run-an-exe-from-c-sharp-code"/>
     public void Execute(){
@@ -176,5 +195,23 @@ class ExeRunner
     }
     #endregion
 
+    #region ThreadCallBackMethods
+    public void ThreadPoolExecuteCallback(Object threadContext){
+    
+        if (_doneEvent != null)
+        {
+            Console.WriteLine("You must provide a ManualResetEvent --> this.DoneEvent");
+        }
+        else{
+            // store the thread index
+            int threadIndex = (int)threadContext;
+            Execute();
+            Console.WriteLine("thread {0} result calculated...", threadIndex);
+            
+            // Notifies the threadpool that this thread has finished its execution
+            _doneEvent.Set();
+        }
 
+    }
+    #endregion
 }
